@@ -1,13 +1,17 @@
-import logo from './logo.svg';
+import logo from '../src/logoJyb.png';
 import './App.css';
+import NavBar from './components/NavBar/NavBar';
+import ItemListContainer from './components/ItemListContainer/ItemListContainer';
+
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
+        <NavBar />
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
+        <p className="Parrafo">
+          <ItemListContainer />
         </p>
         <a
           className="App-link"
