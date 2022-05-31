@@ -4,6 +4,19 @@
     box-sizing: border-box;
 }
 
+.App-header {
+    position: sticky;
+    min-height: 100vh;
+    top: 0;
+    z-index: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: calc(10px + 2vmin);
+    background-color: black;
+}
+
 .navBar,
 .ulNav,
 .liNav {
