@@ -1,0 +1,27 @@
+.contador {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+
+.boton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    width: 30px;
+    height: 30px;
+    background-color: rgb(25, 155, 68);
+    font-size: 30px;
+    color: rgb(0, 0, 0);
+}
+
+.cuenta {
+    width: 80px;
+}
+
+.agregaarCarrito {
+    background-color: coral;
+}
