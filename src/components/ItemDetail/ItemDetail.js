@@ -5,7 +5,7 @@ const ItemDetail = ({ id, tipo, descripcion, precio, img, marca }) => {
     return (
         <div className="container">
             <div className="img">
-            <img className="detalleImg" src={`.${img}`} alt={`foto de una imagen de un queso ${tipo}`}/>
+            <img className="detalleImg" src={img} alt={`foto de una imagen de un queso ${tipo}`}/>
             </div>
             <div className="descrip">
                 <p className="detalleSub"><spam>Marca: </spam>{marca}</p>
