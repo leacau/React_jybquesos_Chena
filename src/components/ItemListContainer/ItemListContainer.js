@@ -1,28 +1,47 @@
 import "./ItemListContainer.css"
 import { useEffect, useState } from "react"
-import { getQuesos } from "../../productos.js"
+import { getProductos, getProductosByCategoria } from "../../productos.js"
 import ItemList from "../ItemList/ItemList"
-
-let mensaje = prompt("Decinos tu nombre")
+import { useParams } from "react-router-dom"
 
 const ItemListContainer =()=>{
 
-    const [quesos, setQuesos] = useState([])
+    const [productos, setProductos] = useState([])
+    const [loading, setLoading] = useState (true)
+    
+    const { categoriaId } = useParams()
+
 
     useEffect(() => {
-        getQuesos().then( res => {
-            setQuesos(res)
+        setLoading(true)
+
+        if(!categoriaId){
+        getProductos().then( res => {
+            setProductos(res)
+        }).finally(() => {
+            setLoading(false)
         })
+        }else{
+            getProductosByCategoria(categoriaId).then( res => {
+                setProductos(res)
+            }).finally(() => {
+                setLoading(false)
+            })
+        }
+    },[categoriaId])
 
-    },[])
-
+    if(loading){
+        return(
+            <h1>cargando productos...</h1>
+        )
+    }
 return (
 <div>
     <div className="saludo">
-        <h2>Hola <span>{mensaje}</span> bienvenido a nuestra App! </h2>
+        <h2>Hola bienvenido a nuestra App! </h2>
     </div>
     <div className="catalogo">
-        <ItemList productos={ quesos } />
+        <ItemList productos={ productos } />
     </div>
 </div>
 )

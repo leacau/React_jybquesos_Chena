@@ -1,11 +1,11 @@
 .borderCard {
     margin: 20px;
     padding: 5px;
-    border: 2px solid black;
     border-radius: 8px;
     width: 250px;
     height: auto;
-    box-shadow: 0 3px 13px 1px rgb(0 0 0 /9%);
+    box-shadow: 1px 10px 20px rgb(66, 66, 66);
+    background-color: azure;
 }
 
 .imagenProd {
@@ -15,4 +15,9 @@
 .titulo {
     font-size: 20px;
     color: coral;
+}
+
+a {
+    text-decoration: none;
+    color: black;
 }

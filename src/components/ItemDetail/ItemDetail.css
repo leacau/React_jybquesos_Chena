@@ -1,0 +1,50 @@
+.container {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    word-wrap: normal;
+    grid-template-columns: 0.4fr 1fr;
+    grid-template-rows: 0.5fr 0.2fr;
+    grid-template-areas:
+        "img descrip"
+        "conuter descrip";
+    border: 1px solid black;
+    border-radius: 10px;
+    box-shadow: 1px 10px 20px rgb(66, 66, 66);
+}
+
+.img {
+    grid-area: img;
+    height: 100%;
+    border-right: 1px solid black;
+}
+
+.conuter {
+    grid-area: conuter;
+    border-right: 1px solid black;
+    height: 100%
+}
+
+.descrip {
+    grid-area: descrip;
+
+}
+
+spam {
+    font-size: 20px;
+    font-weight: bold;
+    color: black;
+}
+
+.detalleSub,
+.detalleDesc,
+.detallePrecio {
+    padding-left: 10px;
+    font-size: 20px;
+    font-weight: 300;
+    text-align: left;
+}
+
+.detalleImg {
+    width: 250px;
+}

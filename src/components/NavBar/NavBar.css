@@ -26,16 +26,19 @@
     flex-direction: row;
     justify-content: right;
     list-style: none;
+    padding-right: 15px;
 }
 
 .navBar {
     box-shadow: 20px 0 15px rgb(0, 0, 0), 50px 0 30px white;
     position: sticky;
     background-image: linear-gradient(to left, rgb(206, 214, 86), white);
+    display: flex;
+    justify-content: center;
 }
 
 .navLink {
     color: black;
-    padding: 0 5px 0 5px;
+    padding: 0 15px 0 15px;
     text-decoration: none;
 }
