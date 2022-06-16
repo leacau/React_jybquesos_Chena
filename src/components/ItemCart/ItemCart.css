@@ -1,0 +1,14 @@
+.detalleItemCart {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 90vw;
+    padding: 0;
+    margin-bottom: 15px;
+    box-shadow: 1px 10px 20px rgb(66, 66, 66);
+}
+
+.imagenProdCart {
+    width: 90px
+}

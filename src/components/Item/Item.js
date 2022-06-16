@@ -1,8 +1,8 @@
 import "./Item.css"
 import { Link } from 'react-router-dom'
 
-
 const Item = ({id, tipo, marca, img, precio }) => {
+
     return(
     <div className="borderCard">
             <div className="titleCard">
