@@ -9,13 +9,9 @@ const CartWidget = () =>{
     const totalProductos = cantProductos
     console.log(totalProductos);
 
-    if(totalProductos<1){
-        return <></>
-    }
-
     return(
     <>
-        <Link to='/carrito'><img src='../img/CartWidget.png' alt="Carrito de compras" /> { totalProductos }</Link>
+        {(totalProductos!==0) && (<Link to='/carrito'><img src='../img/CartWidget.png' alt="Carrito de compras" /> { totalProductos }</Link>)}
 
     </>
 )}
