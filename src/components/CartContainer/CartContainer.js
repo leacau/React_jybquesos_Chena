@@ -1,6 +1,8 @@
 import { useContext } from "react"
 import CartContext from "../../context/cartContext"
 import CartList from "../CartList/CartList"
+import { Link } from 'react-router-dom'
+
 
 const CartContainer =()=>{
 
@@ -8,16 +10,30 @@ const CartContainer =()=>{
     
     const { limpiarCarrito } = useContext(CartContext);
 
-return (
-<div>
-    <div className="catalogo">
-        <CartList productosEnCarrito={carrito} />
-    </div>
+    console.log(carrito.length);
+
+    if(carrito.length<1){
+       return(
+        <>
+            <div>
+                <h2>No hay productos en el carrito.</h2>
+                <br></br>
+                <Link to='/' className='linkIrHome'><h4>Ir al catálogo de productos</h4></Link>
+            </div>
+        </>
+        )
+    }
+
+    return (
     <div>
-        <button onClick={limpiarCarrito}>Limpiar Carrito</button>
+        <div className="catalogo">
+            <CartList productosEnCarrito={carrito} />
+        </div>
+        <div>
+            <button onClick={limpiarCarrito}>Limpiar Carrito</button>
+        </div>
     </div>
-</div>
-)
+    )
 }
 
 export default CartContainer

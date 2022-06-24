@@ -4,7 +4,7 @@ import { useContext, useState } from "react"
 import CartContext from "../../context/cartContext"
 import { Link } from 'react-router-dom'
 
-const ItemDetail = ({ id, tipo, descripcion, precio, img, marca, existencia }) => {
+const ItemDetail = ({ id, tipo, descripción, precio, img, marca, existencia }) => {
     
     const { addItem } = useContext( CartContext )
     const [cantidadAgregada, setCantidadAgregada] = useState(0)
@@ -23,7 +23,7 @@ const ItemDetail = ({ id, tipo, descripcion, precio, img, marca, existencia }) =
             <div className="descrip">
                 <p className="detalleSub"><span>Marca: </span>{marca}</p>
                 <p className="detalleSub"><span>Tipo: </span>{tipo}</p>
-                <p className="detalleDesc"><span>Descripción: </span>{descripcion}</p>
+                <p className="detalleDesc"><span>Descripción: </span>{descripción}</p>
                 <p className="detallePrecio"><span>Precio: </span>${precio}</p>
             </div>
             <div className="conuter">

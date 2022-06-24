@@ -1,5 +1,6 @@
 import { useContext } from "react"
 import CartContext from "../../context/cartContext"
+import { Link } from "react-router-dom"
 
 const CartWidget = () =>{
 
@@ -8,9 +9,13 @@ const CartWidget = () =>{
     const totalProductos = cantProductos
     console.log(totalProductos);
 
-return(
+    if(totalProductos<1){
+        return <></>
+    }
+
+    return(
     <>
-        <img src='../img/CartWidget.png' alt="Carrito de compras" /> { totalProductos }
+        <Link to='/carrito'><img src='../img/CartWidget.png' alt="Carrito de compras" /> { totalProductos }</Link>
 
     </>
 )}
