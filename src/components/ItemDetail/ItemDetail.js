@@ -10,6 +10,7 @@ const ItemDetail = ({ id, tipo, descripción, precio, img, marca, existencia }) 
     const [cantidadAgregada, setCantidadAgregada] = useState(0)
 
     const agregar = (cantidad) => {
+        /* mensaje de agregado va acá */
         console.log(`Se agregaron ${cantidad} ${marca}-${tipo} id:${id} ` )
         addItem({id, marca, tipo, precio, cantidad, img})
         setCantidadAgregada(cantidad)

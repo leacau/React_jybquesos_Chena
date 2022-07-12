@@ -3,6 +3,9 @@ import CartContext from "../../context/cartContext"
 import CartList from "../CartList/CartList"
 import { Link } from 'react-router-dom'
 
+import { addDoc, collection } from 'firebase/firestore'
+import { db } from '../../services/firebase/index'
+
 
 const CartContainer =()=>{
 
@@ -10,7 +13,34 @@ const CartContainer =()=>{
     
     const { limpiarCarrito } = useContext(CartContext);
 
-    console.log(carrito.length);
+    const { getTotal } = useContext(CartContext)
+
+    const total = getTotal()
+
+    const handleCreateOrder = () => {
+
+        
+        
+        const objOrder = {
+            buyer: {
+                name: 'Leandro',
+                email: 'lea@lea.com',
+                phone: '3221522154',
+                fecha: new Date()
+            },
+            items: carrito,
+            total
+        }
+
+        const collectionRef = collection(db, 'orders')
+
+        addDoc(collectionRef, objOrder).then(({ id }) => {
+            console.log(id);
+        })
+
+    }
+
+
 
     if(carrito.length<1){
        return(
@@ -30,7 +60,9 @@ const CartContainer =()=>{
             <CartList productosEnCarrito={carrito} />
         </div>
         <div>
+            <h2>Total: ${total}</h2>
             <button onClick={limpiarCarrito}>Limpiar Carrito</button>
+            <button onClick={handleCreateOrder}>Enviar pedido</button>
         </div>
     </div>
     )

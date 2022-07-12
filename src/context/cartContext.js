@@ -24,6 +24,16 @@ export const CartProvider = ({ children }) => {
         setCarrito([])
     }
 
+    const getTotal = () =>{
+        let total = 0
+        let subtotal = 0
+        carrito.forEach(item => {
+            subtotal = item.cantidad * item.precio
+            total += subtotal
+        });
+        return total 
+    }
+
     
     useEffect(() => {
         let cantProductos = 0
@@ -35,7 +45,7 @@ export const CartProvider = ({ children }) => {
 
 
     return(
-        <CartContext.Provider value={ { carrito, addItem, quitarItem, cantProductos, limpiarCarrito } }>
+        <CartContext.Provider value={ { carrito, addItem, quitarItem, cantProductos, limpiarCarrito, getTotal } }>
             { children }        
         </CartContext.Provider>
 

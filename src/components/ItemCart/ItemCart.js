@@ -4,13 +4,11 @@ import "./ItemCart.css";
 
 const ItemCart = ({id, tipo, marca, img, precio, cantidad }) => {
     const subtotal = precio * cantidad;
-
     const { quitarItem } = useContext(CartContext);
 
     const deleteItem = () => {
         quitarItem(id);
     }
-
     return(
     <div className="detalleItemCart">
         <>
