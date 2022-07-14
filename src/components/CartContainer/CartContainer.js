@@ -3,11 +3,10 @@ import CartContext from "../../context/cartContext"
 import CartList from "../CartList/CartList"
 import { Link } from 'react-router-dom'
 
-import { addDoc, collection } from 'firebase/firestore'
-import { db } from '../../services/firebase/index'
-
 
 const CartContainer =()=>{
+
+    const Swal = require('sweetalert2')
 
     const { carrito } = useContext(CartContext)
     
@@ -17,40 +16,15 @@ const CartContainer =()=>{
 
     const total = getTotal()
 
-    const handleCreateOrder = () => {
-
-        
-        
-        const objOrder = {
-            buyer: {
-                name: 'Leandro',
-                email: 'lea@lea.com',
-                phone: '3221522154',
-                fecha: new Date()
-            },
-            items: carrito,
-            total
-        }
-
-        const collectionRef = collection(db, 'orders')
-
-        addDoc(collectionRef, objOrder).then(({ id }) => {
-            console.log(id);
-        })
-
-    }
-
-
-
     if(carrito.length<1){
        return(
-        <>
-            <div>
-                <h2>No hay productos en el carrito.</h2>
-                <br></br>
-                <Link to='/' className='linkIrHome'><h4>Ir al catálogo de productos</h4></Link>
-            </div>
-        </>
+            Swal.fire({
+                title: 'Su carrito está vacío',
+                confirmButtonText: 'Ok',
+                timer: 1500
+            }).then(()=>{
+                window.location = "../../"
+            })          
         )
     }
 
@@ -62,7 +36,7 @@ const CartContainer =()=>{
         <div>
             <h2>Total: ${total}</h2>
             <button onClick={limpiarCarrito}>Limpiar Carrito</button>
-            <button onClick={handleCreateOrder}>Enviar pedido</button>
+            < Link to='/checkout'><button>Realizar pedido</button></Link>
         </div>
     </div>
     )
