@@ -18,9 +18,11 @@
 }
 
 .img {
+    padding: 20px 0px;
     grid-area: img;
     height: 100%;
     border-right: 1px solid black;
+    z-index: 1;
 }
 
 .counter {
