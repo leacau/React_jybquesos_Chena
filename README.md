@@ -11,7 +11,7 @@ Como correr la aplicación en tu compu:
 ...
 ### `clone`
 
-se debe clonar el repositorio. Ultima rama "routes".
+se debe clonar el repositorio. Ultima rama "entrega_final".
 
 ...
 ### `npm install`
@@ -26,4 +26,3 @@ Ejecutar el servidor de desarrollo.
 ...
 ## `app en funcioanmiento`
 
-![](src%5Capp_gif%5Cfuncionando.gif)

@@ -36,7 +36,8 @@ const CartContainer =()=>{
         </div>
         <div>
             <h2>Total: ${total}</h2>
-            <button onClick={limpiarCarrito} className='btn btn-warning p-1 m-3'>Limpiar Carrito</button>
+            <button onClick={limpiarCarrito} className='btn btn-danger p-1 m-3'>Limpiar Carrito</button>
+            < Link to='/'><button className='btn btn-secondary p-1 m-3'>Continuar comprando</button></Link>
             < Link to='/checkout'><button className='btn btn-primary p-1 m-3'>Realizar pedido</button></Link>
         </div>
     </div>

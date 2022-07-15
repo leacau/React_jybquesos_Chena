@@ -11,7 +11,7 @@ const Item = ({id, tipo, marca, img, precio }) => {
                     <img className="imagenProd" src={img} alt={`foto de una imagen de un queso ${tipo}`}/>
                 </div>
                 <p>Precio: <span>${ precio }</span> x/Kg</p>
-                <Link to={`/detalle/${id}`}>Detalles</Link>
+                <Link to={`/detalle/${id}`}><button className="btn btn-primary">Detalles</button></Link>
             </div>
     </div>
 

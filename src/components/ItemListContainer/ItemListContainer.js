@@ -25,7 +25,8 @@ const ItemListContainer =()=>{
             const productosFromatted = res.docs.map(doc =>{
                 return { id: doc.id, ...doc.data() }
             })
-            setProductos(productosFromatted)
+            const productosFiltrados = productosFromatted.filter(producto => producto.existencia > 0)
+            setProductos(productosFiltrados)
         }).catch(error => {
             console.log(error);
         }).finally(() => {

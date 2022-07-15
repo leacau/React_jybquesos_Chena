@@ -24,7 +24,7 @@ const Checkout = () => {
 
     }
 
-    const { carrito, getTotal, limpiarCarrito } = useContext(CartContext)
+    const { carrito, getTotal, limpiarCarritoFunc } = useContext(CartContext)
 
     const Swal = require('sweetalert2')
 
@@ -111,7 +111,7 @@ const Checkout = () => {
                         }).then((response)=>{
                             if(response.isConfirmed){
                                 window.location = "../../"
-                                limpiarCarrito()
+                                limpiarCarritoFunc('no')
                             }
                         })
                     }           
@@ -230,8 +230,8 @@ const Checkout = () => {
                 </div>
                 
             </div>
-            <button type='button' className='btn btn-success mx-3' onClick={handleCreateOrder}>Finalizar Pedido</button>
-            <Link to='/carrito'><button type='button' className='btn btn-warning mx-3'>Volver al carrito</button></Link>
+            <button type='button' className='btn btn-success m-3' onClick={handleCreateOrder}>Finalizar Pedido</button>
+            <Link to='/carrito'><button type='button' className='btn btn-warning m-3'>Volver al carrito</button></Link>
         </div>
 
     )
