@@ -11,13 +11,12 @@ const ItemDetail = ({ id, tipo, descripción, precio, img, marca, existencia }) 
 
     const agregar = (cantidad) => {
         /* mensaje de agregado va acá */
-        console.log(`Se agregaron ${cantidad} ${marca}-${tipo} id:${id} ` )
         addItem({id, marca, tipo, precio, cantidad, img})
         setCantidadAgregada(cantidad)
     }
 
     return (
-        <div className="container">
+        <div className="container2">
             <div className="img">
             <img className="detalleImg" src={img} alt={`foto de una imagen de un queso ${tipo}`}/>
             </div>

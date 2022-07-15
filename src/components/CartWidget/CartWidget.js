@@ -7,7 +7,6 @@ const CartWidget = () =>{
     const { cantProductos } = useContext( CartContext )
 
     const totalProductos = cantProductos
-    console.log(totalProductos);
 
     return(
     <>

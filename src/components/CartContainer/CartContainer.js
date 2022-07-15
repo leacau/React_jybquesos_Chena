@@ -1,3 +1,4 @@
+import './CartContainer.css'
 import { useContext } from "react"
 import CartContext from "../../context/cartContext"
 import CartList from "../CartList/CartList"
@@ -30,13 +31,13 @@ const CartContainer =()=>{
 
     return (
     <div>
-        <div className="catalogo">
+        <div className='catalogo container py-4'>
             <CartList productosEnCarrito={carrito} />
         </div>
         <div>
             <h2>Total: ${total}</h2>
-            <button onClick={limpiarCarrito}>Limpiar Carrito</button>
-            < Link to='/checkout'><button>Realizar pedido</button></Link>
+            <button onClick={limpiarCarrito} className='btn btn-warning p-1 m-3'>Limpiar Carrito</button>
+            < Link to='/checkout'><button className='btn btn-primary p-1 m-3'>Realizar pedido</button></Link>
         </div>
     </div>
     )

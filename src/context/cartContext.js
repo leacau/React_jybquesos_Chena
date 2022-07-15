@@ -3,15 +3,23 @@ import { useEffect, useState, createContext } from "react";
 
 const CartContext = createContext();
 
+
 export const CartProvider = ({ children }) => {
     const [carrito, setCarrito] = useState([]);
     const [cantProductos, setCantProductos] = useState(0)
-    console.log(carrito);
+
 
     const addItem = (agregarProduct) =>{
+        const Swal = require('sweetalert2')
+
         if(!carrito.some(prod => prod.id === agregarProduct.id) ){
            setCarrito([...carrito, agregarProduct]) 
-           console.log(agregarProduct);
+           Swal.fire({
+            title: 'producto agregado',
+            position: 'top',
+            background: '#defde0',
+            timer: 1000
+        })
         }
     }
 

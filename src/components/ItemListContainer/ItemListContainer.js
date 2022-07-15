@@ -22,7 +22,6 @@ const ItemListContainer =()=>{
         ) : (collection(db, 'productos'))
 
         getDocs(collectionRef).then(res => {
-            console.log(res);
             const productosFromatted = res.docs.map(doc =>{
                 return { id: doc.id, ...doc.data() }
             })
@@ -43,7 +42,7 @@ const ItemListContainer =()=>{
 return (
 <div>
     <div className="saludo">
-        <h2>Hola bienvenido a nuestra App! </h2>
+        <h2>Tienda de productos</h2>
     </div>
     <div className="catalogo">
         <ItemList productos={ productos } />

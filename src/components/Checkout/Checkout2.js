@@ -2,13 +2,13 @@ import { useState, useContext} from 'react'
 import CartContext from "../../context/cartContext"
 import { addDoc, collection, writeBatch, getDocs, query, where, documentId } from 'firebase/firestore'
 import { db } from '../../services/firebase/index'
-import { Link } from 'react-router-dom'
 
 
 
 
 const Checkout = () => {
-    const [loading, setLoading] = useState(false)
+
+    const { carrito } = useContext(CartContext)
 
     const [checkoutInput, setCheckoutInput] = useState({
         apellido: '',
@@ -24,138 +24,119 @@ const Checkout = () => {
 
     }
 
-    const { carrito, getTotal, limpiarCarrito } = useContext(CartContext)
-
     const Swal = require('sweetalert2')
+
+    const { limpiarCarrito } = useContext(CartContext);
+
+    const { getTotal } = useContext(CartContext)
 
     const total = getTotal()
 
-    const handleCreateOrder = () => {
-        setLoading(true)
-          
-        const objOrder = {
-            buyer: {
-                name: checkoutInput.nombre,
-                lastName: checkoutInput.apellido,
-                email: checkoutInput.email,
-                phone: checkoutInput.telefono,
-                fecha: new Date()
-            },
-            items: carrito,
-            total
-        }
+    const handleCreateOrder = () => { 
+
+        if(checkoutInput.apellido === '' || checkoutInput.nombre === '' || checkoutInput.email === '' || checkoutInput.telefono === ''){
+
+            Swal.fire({
+                title: 'Faltan datos',
+                text: 'Por favor complete todos los campos',
+                confirmButtonText: 'Ok',
+                timer: 1500
+            })
+
+
+        }else{  
+            const objOrder = {
+                buyer: {
+                    name: checkoutInput.nombre,
+                    lastName: checkoutInput.apellido,
+                    email: checkoutInput.email,
+                    phone: checkoutInput.telefono,
+                    fecha: new Date()
+                },
+                items: carrito,
+                total
+            }
 
         const batch = writeBatch(db)
 
         const ids = carrito.map(item => item.id)
 
-        const outOfStock = []
+        const OutOfStock = []
 
         const collectionRef = collection(db, 'productos')
 
+        getDocs(collection(db, 'productos')).then(docs => {
+            console.log(docs.id);
+        })
+
+
+
         getDocs(query(collectionRef, where(documentId(), 'in', ids)))
             .then(response => {
+                console.log(response.docs);
+
                 response.docs.forEach(doc => {
                     const dataDoc = doc.data()
+                    const prod = carrito.find (prod => prod.id === doc.id)
+                    console.log(prod);
+                    const prodQuantity = prod.cantidad
+                    console.log(prodQuantity);
 
-                    const prodCarr = carrito.find(prod => prod.id === doc.id)
-                    const prodCarrCantidad = prodCarr.cantidad
-
-                    if(dataDoc.existencia >= prodCarrCantidad) {
-
+                    if(dataDoc.existencia >= prodQuantity) {
                         batch.update(doc.ref, {
-                            existencia: dataDoc.existencia - prodCarrCantidad })
-                  
+                            existencia: dataDoc.existencia - prodQuantity})
                     } else {
-                        outOfStock.push({id: doc.id, ...dataDoc})
-                    }
-
-                })
-            }).then(() => {
-
-                if(outOfStock.length === 0) {
-
-                    if(checkoutInput.apellido === '' || checkoutInput.nombre === '' || checkoutInput.email === '' || checkoutInput.telefono === ''){
-
-                        return Promise.reject({ type: 'emptyInfo' })                                                               
-            
-                    } else {
-
+                        OutOfStock.push({id: doc.id, ...dataDoc})
+                        Swal.fire({
+                            title: 'Productos sin existencia',
+                            html: `<ul>${OutOfStock.map(item => `<li>${item.nombre}</li>`).join('')}</ul>`,})
+                        }
+                        }).then(()=>{
+                    if(OutOfStock.length === 0) {
                         const collectionRef = collection(db, 'orders')
 
-                        return addDoc(collectionRef, objOrder)
-                    }
+                        addDoc(collectionRef, objOrder).then(({ id }) => {
 
-                } else {
+                            batch.commit()
 
-                    return Promise.reject({ type: 'outOfStock', data: outOfStock })
-
-                }
-
-            }).then(({ id }) => {
-
-                batch.commit()
-                Swal.fire({
+                            Swal.fire({
                 
-                    title: 'Tomá nota del Id del pedido',
-                    html: `<b>${id}</b>`,
-                    confirmButtonText: 'Hecho'
-    
-                }).then(res=>{
-                    if(res.isConfirmed){
-                        Swal.fire({
-                            title: 'Pedido realizado con éxito',
-                            html: `En breve nos pondremos en conacto para coordinar la entrega`,
-                            confirmButtonText: 'Hecho',
-                            icon: 'success'
-                        }).then((response)=>{
-                            if(response.isConfirmed){
-                                window.location = "../../"
-                                limpiarCarrito()
-                            }
-                        })
+                                title: 'Tomá nota del Id del pedido',
+                                html: `<b>${id}</b>`,
+                                confirmButtonText: 'Hecho'
+                
+                            }).then(res=>{
+                                if(res.isConfirmed){
+                                    Swal.fire({
+                                        title: 'Pedido realizado con éxito',
+                                        html: `En breve nos pondremos en conacto para coordinar la entrega`,
+                                        confirmButtonText: 'Hecho',
+                                        icon: 'success'
+                                    }).then(()=>{
+                                        window.location = "../../"
+                                        limpiarCarrito()
+                                    })
                     }           
+                            })
+                        })
+
+                    }
                 })
-
-            }).catch(error => {
-
-                if(error.type === 'outOfStock') {
-
-                    Swal.fire({
-                        title: 'Productos sin existencia',
-                        html: `<b>${error.data.map(item => `${item.marca}-${item.tipo}. Stock:(${item.existencia})`).join(', ')}</b>`,
-                        confirmButtonText: 'Ok'
-
-                    })
-
-                } else if(error.type === 'emptyInfo') {
-
-                    Swal.fire({
-                        title: 'Faltan datos de contacto',
-                        text: 'Por favor complete todos los campos',
-                        confirmButtonText: 'Ok',
-                        timer: 1500
-                    })
-
-                } else {
-
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Ha ocurrido un error, por favor intente nuevamente',
-                        confirmButtonText: 'Ok'
-                    })
-                }
-            }).finally(() => {
-
-                setLoading(false)
-
             })
-
+        }
     }
 
-    if(loading) {
-        return <h1>Se esta generando su orden...</h1>
-    }
+    if(carrito.length<1){
+        return(
+             Swal.fire({
+                 title: 'Su carrito está vacío',
+                 confirmButtonText: 'Ok',
+                 timer: 1500
+             }).then(()=>{
+                 window.location = "../../"
+             })          
+         )
+     }
 
     return (
         <div className='py-4'>
@@ -180,15 +161,15 @@ const Checkout = () => {
                                             </div>
                                             <div className='form-group mb-3'>
                                                 <label>Nombre</label>
-                                                <input type="text" name="nombre" className='form-control' onChange={handleInput} value={checkoutInput.nombre}></input>
+                                                <input type="text" name="nombre" className='form-control' onChange={handleInput} value={checkoutInput.nombre} required></input>
                                             </div>
                                             <div className='form-group mb-3'>
                                                 <label>Teléfono</label>
-                                                <input type="number" name="telefono" className='form-control' onChange={handleInput} value={checkoutInput.telefono}></input>
+                                                <input type="number" name="telefono" className='form-control' onChange={handleInput} value={checkoutInput.telefono} required></input>
                                             </div>
                                             <div className='form-group mb-3'>
                                                 <label>Email</label>
-                                                <input type="mail" name="email" className='form-control' onChange={handleInput} value={checkoutInput.email}></input>
+                                                <input type="mail" name="email" className='form-control' onChange={handleInput} value={checkoutInput.email} required></input>
                                             </div>
                                         
                                     </div>
@@ -230,8 +211,7 @@ const Checkout = () => {
                 </div>
                 
             </div>
-            <button type='button' className='btn btn-success mx-3' onClick={handleCreateOrder}>Finalizar Pedido</button>
-            <Link to='/carrito'><button type='button' className='btn btn-warning mx-3'>Volver al carrito</button></Link>
+            <button type='button' className='btn btn-primary' onClick={handleCreateOrder}>Finalizar Pedido</button>
         </div>
 
     )
