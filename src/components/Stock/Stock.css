@@ -1,0 +1,12 @@
+.lista{
+    border-bottom: 2px solid black;
+}
+
+.title{
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    position:relative;
+}
