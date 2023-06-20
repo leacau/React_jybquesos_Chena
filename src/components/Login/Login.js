@@ -1,31 +1,30 @@
-import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 
+import Register from '../Register/Register';
 import { useAuth } from '../../context/cartContext';
-import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
-	const Swal = require('sweetalert2');
 	const { signIn, user } = useAuth();
 	const navigate = useNavigate();
 
+	useEffect(() => {
+		if (user) {
+			navigate('/');
+		}
+	}, [user, navigate]);
+
 	const handleLogin = async (e) => {
 		e.preventDefault();
-
-		await signIn(email, password)
-			.then((userCredential) => {
-				Swal.fire({
-					title: `Login exitoso ${user.email}`,
-					confirmButtonText: 'Hecho',
-					icon: 'success',
-				});
-				userCredential && navigate('/');
-			})
-			.catch((error) => {
-				setError(error);
-			});
+		try {
+			await signIn(email, password);
+		} catch (error) {
+			console.log('Error: ', error);
+			setError(error.message);
+		}
 	};
 
 	return (
@@ -47,6 +46,14 @@ const Login = () => {
 				<button type='submit'>Iniciar sesión</button>
 			</form>
 			{error && <p>{error.message}</p>}
+			<br />
+			Si todavía no tenes cuenta
+			<span>
+				<Link to='/register' className='navLink'>
+					registrate
+				</Link>
+			</span>
+			<Register />
 		</div>
 	);
 };

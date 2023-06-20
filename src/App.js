@@ -2,7 +2,6 @@ import './App.css';
 
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import AdminModule from './components/Administrator/Administrator';
 import CartContainer from './components/CartContainer/CartContainer';
 import { CartProvider } from './context/cartContext';
 import Checkout from './components/Checkout/Checkout';

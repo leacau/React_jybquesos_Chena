@@ -1,11 +1,23 @@
 import './NavBar.css';
 
+import AdminModule from '../Administrator/Administrator';
 import CartWidget from '../CartWidget/CartWidget';
 import { Link } from 'react-router-dom';
+import { auth } from '../../services/firebase';
+import { signOut } from 'firebase/auth';
 import { useAuth } from '../../context/cartContext';
+import { useEffect } from 'react';
 
 const NavBar = () => {
-	const { logOut } = useAuth();
+	const { user, getUserData, infoUser } = useAuth();
+	const logOut = () => signOut(auth);
+
+	useEffect(() => {
+		if (user) {
+			getUserData(user.uid);
+		}
+	}, [user]);
+
 	return (
 		<header className='App-header'>
 			<nav className='navBar'>
@@ -26,9 +38,23 @@ const NavBar = () => {
 						</Link>
 					</li>
 					<li>
-						<button className='logOut' onClick={logOut}>
-							LogOut
-						</button>
+						{user && (
+							<button className='logOut' onClick={logOut}>
+								LogOut
+							</button>
+						)}
+						{!user && (
+							<Link to='/login' className='navLink'>
+								Login
+							</Link>
+						)}
+					</li>
+					<li>
+						{infoUser.rol === 'admin' && (
+							<Link to='/admin' className='navLink'>
+								Panel Admin
+							</Link>
+						)}
 					</li>
 					<li className='widget'>
 						<CartWidget />

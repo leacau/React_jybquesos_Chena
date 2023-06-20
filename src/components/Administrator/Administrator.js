@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-import { StockProductos } from './../Stock/Stock';
 import { auth } from '../../services/firebase';
 
 const AdminModule = () => {

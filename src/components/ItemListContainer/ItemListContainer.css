@@ -14,3 +14,8 @@ span {
     text-align: center;
     justify-content: center;
 }
+
+.alert{
+    align-items: center;
+    justify-content: center;
+}

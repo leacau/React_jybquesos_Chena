@@ -1,13 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
+	browserLocalPersistence,
+	browserSessionPersistence,
 	createUserWithEmailAndPassword,
 	onAuthStateChanged,
 	sendPasswordResetEmail,
+	setPersistence,
 	signInWithEmailAndPassword,
-	signOut,
 } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 import { auth } from '../services/firebase';
+import { db } from '../services/firebase';
 
 const CartContext = createContext();
 
@@ -88,33 +92,6 @@ export const CartProvider = ({ children }) => {
 		return total;
 	};
 
-	const limpiarCarritoFunc = (mostrarMensaje) => {
-		const Swal = require('sweetalert2');
-
-		if (mostrarMensaje === 'yes') {
-			Swal.fire({
-				title: 'Estás seguro?',
-				text: 'No podrás revertir esto!',
-				icon: 'warning',
-				showCancelButton: true,
-				confirmButtonColor: '#3085d6',
-				cancelButtonColor: '#d33',
-				confirmButtonText: 'Si, limpiar carrito!',
-			}).then((result) => {
-				if (result.isConfirmed) {
-					Swal.fire(
-						'Carrito limpio!',
-						'Los productos fueron eliminados del carrito',
-						'success'
-					);
-					setCarrito([]);
-				}
-			});
-		} else {
-			setCarrito([]);
-		}
-	};
-
 	useEffect(() => {
 		let cantProductos = 0;
 		carrito.forEach((prod) => {
@@ -123,25 +100,35 @@ export const CartProvider = ({ children }) => {
 		setCantProductos(cantProductos);
 	}, [carrito]);
 
-	const [user, setUser] = useState(null);
+	const [user, setUser] = useState('');
 	const [loading, setLoading] = useState(true);
+	const [infoUser, setInfoUser] = useState('');
 
 	const signUp = (email, password) =>
 		createUserWithEmailAndPassword(auth, email, password);
 
-	const signIn = (email, password) =>
-		signInWithEmailAndPassword(auth, email, password);
-
-	const logOut = () => signOut(auth);
-
-	const resetPassword = (email) => sendPasswordResetEmail(auth, email);
-
-	useEffect(() => {
-		onAuthStateChanged(auth, (currentUser) => {
+	const signIn = async (email, password) => {
+		setPersistence(auth, browserSessionPersistence)
+			.then(() => {
+				return signInWithEmailAndPassword(auth, email, password);
+			})
+			.catch((error) => {
+				const errorCode = error.code;
+				const errorMessage = error.message;
+			});
+		await onAuthStateChanged(auth, (currentUser) => {
 			setUser(currentUser);
 			setLoading(false);
 		});
-	}, []);
+	};
+	const getUserData = async (userId) => {
+		const docuRef = doc(db, `users/${userId}`);
+		const infoCifrada = await getDoc(docuRef);
+		const infoUsuario = infoCifrada.data();
+		setInfoUser(infoUsuario);
+	};
+
+	const resetPassword = (email) => sendPasswordResetEmail(auth, email);
 
 	return (
 		<CartContext.Provider
@@ -152,13 +139,13 @@ export const CartProvider = ({ children }) => {
 				cantProductos,
 				limpiarCarrito,
 				getTotal,
-				limpiarCarritoFunc,
 				signUp,
 				signIn,
 				user,
-				logOut,
 				loading,
 				resetPassword,
+				infoUser,
+				getUserData,
 			}}
 		>
 			{children}
