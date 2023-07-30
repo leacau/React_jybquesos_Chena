@@ -4,8 +4,11 @@ import CartContext from '../../context/cartContext';
 import CartList from '../CartList/CartList';
 import { Link } from 'react-router-dom';
 import { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CartContainer = () => {
+	const navigate = useNavigate();
+
 	const Swal = require('sweetalert2');
 
 	const { carrito } = useContext(CartContext);
@@ -19,10 +22,9 @@ const CartContainer = () => {
 	if (carrito.length < 1) {
 		Swal.fire({
 			title: 'Su carrito está vacío',
-			confirmButtonText: 'Ok',
 			timer: 1500,
 		}).then(() => {
-			window.location = '../../';
+			navigate('/');
 		});
 	}
 

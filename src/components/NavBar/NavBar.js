@@ -16,7 +16,7 @@ const NavBar = () => {
 		if (user) {
 			getUserData(user.uid);
 		}
-	}, [user]);
+	}, [user, getUserData]);
 
 	return (
 		<header className='App-header'>

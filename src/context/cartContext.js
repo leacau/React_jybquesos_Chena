@@ -1,7 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
-	browserLocalPersistence,
-	browserSessionPersistence,
 	createUserWithEmailAndPassword,
 	onAuthStateChanged,
 	sendPasswordResetEmail,
@@ -103,19 +101,18 @@ export const CartProvider = ({ children }) => {
 	const [user, setUser] = useState('');
 	const [loading, setLoading] = useState(true);
 	const [infoUser, setInfoUser] = useState('');
+	const [errorLogin, setErrorLogin] = useState('');
 
 	const signUp = (email, password) =>
 		createUserWithEmailAndPassword(auth, email, password);
 
 	const signIn = async (email, password) => {
-		setPersistence(auth, browserSessionPersistence)
-			.then(() => {
-				return signInWithEmailAndPassword(auth, email, password);
-			})
-			.catch((error) => {
-				const errorCode = error.code;
-				const errorMessage = error.message;
-			});
+		signInWithEmailAndPassword(auth, email, password).catch((error) => {
+			const errorCodeLogin = error.code;
+			const errorMessageLogin = error.message;
+
+			setErrorLogin({ code: errorCodeLogin, message: errorMessageLogin });
+		});
 		await onAuthStateChanged(auth, (currentUser) => {
 			setUser(currentUser);
 			setLoading(false);
@@ -133,6 +130,7 @@ export const CartProvider = ({ children }) => {
 	return (
 		<CartContext.Provider
 			value={{
+				errorLogin,
 				carrito,
 				addItem,
 				quitarItem,

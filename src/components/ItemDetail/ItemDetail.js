@@ -10,7 +10,7 @@ import { useAuth } from '../../context/cartContext';
 const ItemDetail = ({
 	id,
 	tipo,
-	descripción,
+	descripcion,
 	precio,
 	img,
 	marca,
@@ -21,13 +21,13 @@ const ItemDetail = ({
 	const { user } = useAuth();
 	const Swal = require('sweetalert2');
 
-	if (!user) {
+	/* if (!user) {
 		console.log('aca entra');
 		Swal.fire({
 			title: 'Para agregar productos al carrito debrás ingresar a tu cuenta',
 			confirmButtonText: 'Entendido',
 		});
-	}
+	} */
 
 	useEffect(() => {
 		if (!user) {
@@ -65,7 +65,7 @@ const ItemDetail = ({
 					</p>
 					<p className='detalleDesc'>
 						<span>Descripción: </span>
-						{descripción}
+						{descripcion}
 					</p>
 					<p className='detallePrecio'>
 						<span>Precio: </span>${precio}

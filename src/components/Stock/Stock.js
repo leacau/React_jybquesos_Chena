@@ -59,6 +59,9 @@ const StockProductos = () => {
 							src={producto.img}
 							alt={`foto de una imagen de un queso ${producto.tipo}`}
 						/>
+						<button onClick={() => navigate(`/editar/${producto.id}`)}>
+							Editar producto
+						</button>
 					</li>
 				))}
 			</ul>

@@ -6,6 +6,7 @@ import CartContainer from './components/CartContainer/CartContainer';
 import { CartProvider } from './context/cartContext';
 import Checkout from './components/Checkout/Checkout';
 import ItemDetailContainer from './components/ItemDetailContainer/ItemDetailContainer';
+import ItemDetailEdit from './components/ItemDetailEdit/ItemDetailEdit';
 import ItemListContainer from './components/ItemListContainer/ItemListContainer';
 import Login from './components/Login/Login';
 import NavBar from './components/NavBar/NavBar';
@@ -28,6 +29,7 @@ function App() {
 							path='/detalle/:productoId'
 							element={<ItemDetailContainer />}
 						/>
+						<Route path='/editar/:productoId' element={<ItemDetailEdit />} />
 						<Route
 							path='/categoria/:categoriaId'
 							element={<ItemListContainer />}

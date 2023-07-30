@@ -8,23 +8,22 @@ const Login = () => {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
-	const { signIn, user } = useAuth();
+	const { signIn, user, errorLogin } = useAuth();
 	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (user) {
+			console.log(user);
 			navigate('/');
 		}
 	}, [user, navigate]);
 
 	const handleLogin = async (e) => {
 		e.preventDefault();
-		try {
-			await signIn(email, password);
-		} catch (error) {
+		await signIn(email, password).catch((error) => {
 			console.log('Error: ', error);
-			setError(error.message);
-		}
+			setError('este error escribi yo');
+		});
 	};
 
 	return (
@@ -45,7 +44,8 @@ const Login = () => {
 				/>
 				<button type='submit'>Iniciar sesión</button>
 			</form>
-			{error && <p>{error.message}</p>}
+			{errorLogin && <p>{errorLogin.code}</p>}
+			{error && <p>{error.code}</p>}
 			<br />
 			Si todavía no tenes cuenta
 			<span>
