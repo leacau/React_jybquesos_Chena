@@ -1,10 +1,10 @@
 import './CartContainer.css';
 
+import { Link, useNavigate } from 'react-router-dom';
+import React, { useContext } from 'react';
+
 import CartContext from '../../context/cartContext';
 import CartList from '../CartList/CartList';
-import { Link } from 'react-router-dom';
-import { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 const CartContainer = () => {
 	const navigate = useNavigate();

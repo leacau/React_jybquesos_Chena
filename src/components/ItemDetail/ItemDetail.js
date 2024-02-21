@@ -1,6 +1,6 @@
 import './ItemDetail.css';
 
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import CartContext from '../../context/cartContext';
 import Contador from '../Counter/Counter';
@@ -9,7 +9,7 @@ import { useAuth } from '../../context/cartContext';
 
 const ItemDetail = ({
 	id,
-	tipo,
+	producto,
 	descripcion,
 	precio,
 	img,
@@ -40,7 +40,7 @@ const ItemDetail = ({
 	}, [user, Swal]);
 
 	const agregar = (cantidad) => {
-		addItem({ id, marca, tipo, precio, cantidad, img });
+		addItem({ id, marca, producto, precio, cantidad, img });
 		setCantidadAgregada(cantidad);
 	};
 
@@ -51,7 +51,7 @@ const ItemDetail = ({
 					<img
 						className='detalleImg'
 						src={img}
-						alt={`foto de una imagen de un queso ${tipo}`}
+						alt={`foto de una imagen de un queso ${producto}`}
 					/>
 				</div>
 				<div className='descrip'>
@@ -60,8 +60,8 @@ const ItemDetail = ({
 						{marca}
 					</p>
 					<p className='detalleSub'>
-						<span>Tipo: </span>
-						{tipo}
+						<span>producto: </span>
+						{producto}
 					</p>
 					<p className='detalleDesc'>
 						<span>Descripción: </span>

@@ -1,6 +1,7 @@
 import './CartList.css';
 
 import ItemCart from '../ItemCart/ItemCart';
+import React from 'react';
 import { useAuth } from '../../context/cartContext';
 import { useNavigate } from 'react-router-dom';
 

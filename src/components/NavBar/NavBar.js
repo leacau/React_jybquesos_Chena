@@ -1,22 +1,22 @@
 import './NavBar.css';
 
-import AdminModule from '../Administrator/Administrator';
+import React, { useEffect } from 'react';
+
 import CartWidget from '../CartWidget/CartWidget';
 import { Link } from 'react-router-dom';
-import { auth } from '../../services/firebase';
-import { signOut } from 'firebase/auth';
 import { useAuth } from '../../context/cartContext';
-import { useEffect } from 'react';
 
 const NavBar = () => {
-	const { user, getUserData, infoUser } = useAuth();
-	const logOut = () => signOut(auth);
+	const { user, getUserData, infoUser, logOut } = useAuth();
+	const existeUser = user;
 
 	useEffect(() => {
-		if (user) {
+		if (existeUser !== null) {
+			console.log(existeUser);
+			console.log(user);
 			getUserData(user.uid);
 		}
-	}, [user, getUserData]);
+	}, [user]);
 
 	return (
 		<header className='App-header'>
@@ -38,24 +38,30 @@ const NavBar = () => {
 						</Link>
 					</li>
 					<li>
-						{user && (
-							<button className='logOut' onClick={logOut}>
+						{user !== null && (
+							<button
+								className='logOut'
+								onClick={() => {
+									logOut();
+								}}
+							>
 								LogOut
 							</button>
 						)}
-						{!user && (
+						{user === null && (
 							<Link to='/login' className='navLink'>
 								Login
 							</Link>
 						)}
 					</li>
 					<li>
-						{infoUser.rol === 'admin' && (
+						{infoUser !== undefined && infoUser.rol === 'admin' && (
 							<Link to='/admin' className='navLink'>
 								Panel Admin
 							</Link>
 						)}
 					</li>
+
 					<li className='widget'>
 						<CartWidget />
 					</li>

@@ -12,7 +12,7 @@ import Login from './components/Login/Login';
 import NavBar from './components/NavBar/NavBar';
 import React from 'react';
 import Register from './components/Register/Register';
-import StockProductos from './components/Stock/Stock';
+import StockProductos from './components/Administrator/Administrator';
 
 function App() {
 	return (

@@ -1,3 +1,4 @@
+import React, { useContext, useState } from 'react';
 import {
 	addDoc,
 	collection,
@@ -7,7 +8,6 @@ import {
 	where,
 	writeBatch,
 } from 'firebase/firestore';
-import { useContext, useState } from 'react';
 
 import CartContext from '../../context/cartContext';
 import { Link } from 'react-router-dom';
@@ -16,8 +16,9 @@ import { useNavigate } from 'react-router-dom';
 
 const Checkout = () => {
 	const navigate = useNavigate();
-	const { carrito, getTotal, limpiarCarritoFunc, infoUser, user } =
-		useContext(CartContext);
+	const { carrito, getTotal, limpiarCarritoFunc, infoUser, user } = useContext(
+		CartContext
+	);
 	const [loading, setLoading] = useState(false);
 	const Swal = require('sweetalert2');
 
@@ -29,24 +30,20 @@ const Checkout = () => {
 	});
 
 	if (!user) {
-		if (!user) {
-			Swal.fire({
-				position: 'top-end',
-				icon: 'info',
-				title: 'Debés iniciar sesión para acceder al carrito',
-				showConfirmButton: false,
-				timer: 2000,
-			}).then(() => {
-				navigate('/login');
-			});
-		}
+		Swal.fire({
+			position: 'top-end',
+			icon: 'info',
+			title: 'Debés iniciar sesión para acceder al carrito',
+			showConfirmButton: false,
+			timer: 2000,
+		}).then(() => {
+			navigate('/login');
+		});
 	} else {
-		if (user) {
-			Swal.fire({
-				title: 'Corroborá los datos de envío. Modificalos si es necesario',
-				confirmButtonText: 'Hecho',
-			});
-		}
+		Swal.fire({
+			title: 'Corroborá los datos de envío. Modificalos si es necesario',
+			confirmButtonText: 'Hecho',
+		});
 
 		const handleInput = (e) => {
 			e.persist();
@@ -142,7 +139,7 @@ const Checkout = () => {
 							html: `<b>${error.data
 								.map(
 									(item) =>
-										`${item.marca}-${item.tipo}. Stock:(${item.existencia})`
+										`${item.marca}-${item.producto}. Stock:(${item.existencia})`
 								)
 								.join(', ')}</b>`,
 							confirmButtonText: 'Ok',
@@ -245,7 +242,7 @@ const Checkout = () => {
 										return (
 											<tr key={producto.id}>
 												<td>
-													{producto.marca}-{producto.tipo}
+													{producto.marca}-{producto.producto}
 												</td>
 												<td>{producto.cantidad}</td>
 												<td>$ {subTotal}</td>

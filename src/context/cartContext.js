@@ -1,21 +1,34 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { addDoc, collection, doc, getDoc } from 'firebase/firestore';
 import {
 	createUserWithEmailAndPassword,
 	onAuthStateChanged,
 	sendPasswordResetEmail,
-	setPersistence,
 	signInWithEmailAndPassword,
+	signOut,
 } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 
 import { auth } from '../services/firebase';
 import { db } from '../services/firebase';
 
 const CartContext = createContext();
 
+export const useAuth = () => {
+	const context = useContext(CartContext);
+	if (!context) {
+		throw new Error('useAuth debe estar dentro del proveedor de Auth');
+	}
+	return context;
+};
 export const CartProvider = ({ children }) => {
 	const [carrito, setCarrito] = useState([]);
 	const [cantProductos, setCantProductos] = useState(0);
+	const [newMessage, setNewMessage] = useState('');
+	const [messageType, setMessageType] = useState('');
+	const [user, setUser] = useState('');
+	const [loading, setLoading] = useState(true);
+	const [infoUser, setInfoUser] = useState('');
+	const [errorLogin, setErrorLogin] = useState('');
 
 	const addItem = (agregarProduct) => {
 		const Swal = require('sweetalert2');
@@ -90,18 +103,71 @@ export const CartProvider = ({ children }) => {
 		return total;
 	};
 
+	const addProduct = (
+		marca,
+		producto,
+		precio,
+		descripcion,
+		categoria,
+		existencia
+	) => {
+		//agregar control de producto existente
+
+		const [newItem, setNewItem] = useState([]);
+
+		const handleAddProduct = async (e) => {
+			e.preventDefault();
+
+			const userCollection = collection(db, 'productos');
+			if (
+				marca === '' ||
+				producto === '' ||
+				precio === '' ||
+				descripcion === '' ||
+				categoria === '' ||
+				existencia === ''
+			) {
+				setNewMessage('Por favor completá todos los campos');
+				setMessageType('error');
+			} else {
+				setLoading(true);
+				await addDoc(userCollection, newItem)
+					.then(() => {
+						setNewMessage('Contacto agregado con éxito');
+						setMessageType('success');
+						setNewItem({
+							marca: '',
+							producto: '',
+							precio: '',
+							descripcion: '',
+							categoria: '',
+							existencia: '',
+						});
+					})
+					.catch((error) => {
+						setNewMessage(error.code);
+						setMessageType('error');
+					});
+				setLoading(false);
+			}
+		};
+
+		handleAddProduct();
+	};
+
 	useEffect(() => {
+		console.log('EJECUTADO EFFECT DE USUARIO');
+		const checkUser = onAuthStateChanged(auth, (currentUser) => {
+			setUser(currentUser);
+			setLoading(false);
+		});
 		let cantProductos = 0;
 		carrito.forEach((prod) => {
 			cantProductos += prod.cantidad;
 		});
 		setCantProductos(cantProductos);
-	}, [carrito]);
-
-	const [user, setUser] = useState('');
-	const [loading, setLoading] = useState(true);
-	const [infoUser, setInfoUser] = useState('');
-	const [errorLogin, setErrorLogin] = useState('');
+		checkUser();
+	}, [carrito, user]);
 
 	const signUp = (email, password) =>
 		createUserWithEmailAndPassword(auth, email, password);
@@ -118,6 +184,13 @@ export const CartProvider = ({ children }) => {
 			setLoading(false);
 		});
 	};
+
+	const logOut = () => {
+		signOut(auth);
+		setUser(false);
+		setInfoUser('');
+	};
+
 	const getUserData = async (userId) => {
 		const docuRef = doc(db, `users/${userId}`);
 		const infoCifrada = await getDoc(docuRef);
@@ -144,19 +217,15 @@ export const CartProvider = ({ children }) => {
 				resetPassword,
 				infoUser,
 				getUserData,
+				newMessage,
+				messageType,
+				addProduct,
+				logOut,
 			}}
 		>
 			{children}
 		</CartContext.Provider>
 	);
-};
-
-export const useAuth = () => {
-	const context = useContext(CartContext);
-	if (!context) {
-		throw new Error('useAuth debe estar dentro del proveedor de Auth');
-	}
-	return context;
 };
 
 export default CartContext;
