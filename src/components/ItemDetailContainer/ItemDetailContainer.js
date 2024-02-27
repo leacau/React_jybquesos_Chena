@@ -1,45 +1,44 @@
-import { useState, useEffect } from 'react'
-import './ItemDetailContainer.css'
-import ItemDetail from '../ItemDetail/ItemDetail'
-import { useParams } from 'react-router-dom'
+import './ItemDetailContainer.css';
 
-import { getDoc, doc } from 'firebase/firestore'
-import { db } from '../../services/firebase'
+import React, { useEffect, useState } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
 
-const ItemDetailContainer = () =>{
+import ItemDetail from '../ItemDetail/ItemDetail';
+import { db } from '../../services/firebase';
+import { useParams } from 'react-router-dom';
 
-    const [producto, setProducto] = useState()
-    const [ loading, setLoading ] = useState(true)
+const ItemDetailContainer = () => {
+	const [producto, setProducto] = useState();
+	const [loading, setLoading] = useState(true);
 
-    const { productoId } = useParams()
+	const { productoId } = useParams();
 
-    useEffect(() => {
+	useEffect(() => {
+		const docRef = doc(db, 'productos', productoId);
 
-        const docRef = doc(db, 'productos', productoId)
+		getDoc(docRef)
+			.then((res) => {
+				const productFormatted = { id: res.id, ...res.data() };
+				setProducto(productFormatted);
+			})
+			.catch((error) => {
+				console.log(error);
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+	}, [productoId]);
 
-        getDoc(docRef).then(res => {
+	if (loading) {
+		return <h1>...cargando</h1>;
+	}
 
-            const productFormatted = { id: res.id, ...res.data()}
-            setProducto(productFormatted)
-        }).catch(error =>{
-            console.log(error);
-        }).finally(() => {
-            setLoading(false)
-        })
+	return (
+		<>
+			<h1 className='tituloDetalle'>Detalle del producto</h1>
+			<ItemDetail {...producto} />
+		</>
+	);
+};
 
-    },[productoId])
-
-    if(loading){
-        return <h1>...cargando</h1>
-    }
-
-return (
-    <>
-    <h1 className='tituloDetalle'>Detalle del producto</h1>
-    <ItemDetail {...producto} />
-    </>
-)
-
-}
-
-export default ItemDetailContainer
+export default ItemDetailContainer;

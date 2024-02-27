@@ -1,5 +1,6 @@
 import './ItemEdit.css';
 
+import React, { useContext, useEffect, useState } from 'react';
 import {
 	addDoc,
 	collection,
@@ -11,7 +12,6 @@ import {
 	where,
 	writeBatch,
 } from 'firebase/firestore';
-import { useContext, useEffect, useState } from 'react';
 
 import { db } from '../../services/firebase';
 import { useAuth } from '../../context/cartContext';

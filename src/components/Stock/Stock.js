@@ -8,13 +8,13 @@ import { useAuth } from '../../context/cartContext';
 import { useNavigate } from 'react-router-dom';
 
 const StockProductos = () => {
-	const { infoUser } = useAuth();
+	const { user, infoUser } = useAuth();
 	const [productos, setProductos] = useState([]);
 	const navigate = useNavigate();
 	const Swal = require('sweetalert2');
 
 	useEffect(() => {
-		if (infoUser.rol !== 'admin') {
+		if (infoUser.rol !== 'admin' || user === '') {
 			Swal.fire({
 				position: 'top-end',
 				icon: 'info',
@@ -42,7 +42,7 @@ const StockProductos = () => {
 
 			obtenerProductos();
 		}
-	}, []);
+	}, [user, infoUser.rol]);
 
 	return (
 		<div>

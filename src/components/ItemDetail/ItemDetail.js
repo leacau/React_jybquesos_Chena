@@ -1,6 +1,6 @@
 import './ItemDetail.css';
 
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import CartContext from '../../context/cartContext';
 import Contador from '../Counter/Counter';

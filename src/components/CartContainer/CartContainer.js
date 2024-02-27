@@ -1,9 +1,10 @@
 import './CartContainer.css';
 
+import React, { useContext } from 'react';
+
 import CartContext from '../../context/cartContext';
 import CartList from '../CartList/CartList';
 import { Link } from 'react-router-dom';
-import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const CartContainer = () => {

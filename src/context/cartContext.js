@@ -3,8 +3,8 @@ import {
 	createUserWithEmailAndPassword,
 	onAuthStateChanged,
 	sendPasswordResetEmail,
-	setPersistence,
 	signInWithEmailAndPassword,
+	signOut,
 } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 
@@ -16,6 +16,10 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
 	const [carrito, setCarrito] = useState([]);
 	const [cantProductos, setCantProductos] = useState(0);
+	const [user, setUser] = useState('');
+	const [loading, setLoading] = useState(true);
+	const [infoUser, setInfoUser] = useState('');
+	const [errorLogin, setErrorLogin] = useState('');
 
 	const addItem = (agregarProduct) => {
 		const Swal = require('sweetalert2');
@@ -91,17 +95,17 @@ export const CartProvider = ({ children }) => {
 	};
 
 	useEffect(() => {
+		console.log(auth);
 		let cantProductos = 0;
 		carrito.forEach((prod) => {
 			cantProductos += prod.cantidad;
 		});
 		setCantProductos(cantProductos);
-	}, [carrito]);
-
-	const [user, setUser] = useState('');
-	const [loading, setLoading] = useState(true);
-	const [infoUser, setInfoUser] = useState('');
-	const [errorLogin, setErrorLogin] = useState('');
+		onAuthStateChanged(auth, (currentUser) => {
+			setUser(currentUser);
+			setLoading(false);
+		});
+	}, [carrito, user]);
 
 	const signUp = (email, password) =>
 		createUserWithEmailAndPassword(auth, email, password);
@@ -118,13 +122,19 @@ export const CartProvider = ({ children }) => {
 			setLoading(false);
 		});
 	};
+
+	const logOut = async () => {
+		await signOut(auth);
+		setUser('');
+		setInfoUser('');
+	};
+
 	const getUserData = async (userId) => {
 		const docuRef = doc(db, `users/${userId}`);
 		const infoCifrada = await getDoc(docuRef);
 		const infoUsuario = infoCifrada.data();
 		setInfoUser(infoUsuario);
 	};
-
 	const resetPassword = (email) => sendPasswordResetEmail(auth, email);
 
 	return (
@@ -144,6 +154,7 @@ export const CartProvider = ({ children }) => {
 				resetPassword,
 				infoUser,
 				getUserData,
+				logOut,
 			}}
 		>
 			{children}
