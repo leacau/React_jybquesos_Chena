@@ -10,3 +10,26 @@
     margin-bottom: 2rem;
     position:relative;
 }
+
+.tabla{
+ align-content: center;
+}
+
+#nuevo{
+    margin: 25px;
+    background-color: #4db6ac;
+    color: #e0f2f1;
+    padding: 5px 10px 5px 10px;
+}
+
+#refresh{
+    margin: 25px;
+    background-color: #ffca28;
+    color: #bf360c;
+    padding: 5px 10px 5px 10px;
+
+}
+
+.buttonSuccess{
+    color: #237317;
+}

@@ -1,16 +1,17 @@
 import './ItemEdit.css';
 
-import React, { useContext, useEffect, useState } from 'react';
+import {
+	DeleteForeverOutlined,
+	SaveAltOutlined,
+	SettingsBackupRestoreOutlined,
+} from '@mui/icons-material';
+import React, { useEffect, useState } from 'react';
 import {
 	addDoc,
 	collection,
+	deleteDoc,
 	doc,
-	documentId,
-	getDoc,
-	query,
 	updateDoc,
-	where,
-	writeBatch,
 } from 'firebase/firestore';
 
 import { db } from '../../services/firebase';
@@ -19,13 +20,15 @@ import { useNavigate } from 'react-router-dom';
 
 const ItemEdit = ({
 	id,
-	tipo,
+	producto,
 	descripcion,
 	precio,
 	img,
 	marca,
 	existencia,
+	categoria,
 }) => {
+	const [updateData, setUpdateData] = useState();
 	const { infoUser } = useAuth();
 	const navigate = useNavigate();
 	const Swal = require('sweetalert2');
@@ -35,104 +38,230 @@ const ItemEdit = ({
 			Swal.fire({
 				position: 'top-end',
 				icon: 'info',
-				title: 'Tus permisos no son suficiente para ingresar a esta sección',
+				title: 'Tus permisos no son suficientes para ingresar a esta sección',
 				showConfirmButton: false,
 				timer: 2000,
 			}).then(() => {
 				navigate('/');
 			});
 		}
-	});
+		setUpdateData({
+			producto: producto,
+			descripcion: descripcion,
+			precio: precio,
+			img: img ? img : '',
+			marca: marca,
+			existencia: existencia,
+			categoria: categoria,
+		});
+	}, []);
+
+	const handleChange = (e) => {
+		e.preventDefault();
+		setUpdateData({ ...updateData, [e.target.name]: e.target.value });
+	};
+
+	const handleCancel = () => {
+		Swal.fire({
+			position: 'top-end',
+			icon: 'info',
+			title: 'Modificación cancelada',
+			showConfirmButton: true,
+		}).then(() => {
+			navigate('/admin');
+		});
+	};
 
 	const handlerModif = async () => {
-		console.log('Ejecutado');
-		const docRef = doc(db, 'productos', id);
-
-		const updateData = {
-			tipo: 'nuevo',
-			descripcion: 'Alguna nueva descripción',
-			precio: 999.99,
-			marca: 'exitosa',
-			existencia: 100000,
-		};
-
-		await updateDoc(docRef, updateData)
-			.then(() => {
-				Swal.fire({
-					position: 'top-end',
-					icon: 'success',
-					title: 'Modificación exitosa',
-					showConfirmButton: true,
+		if (id === 'nuevo_prod') {
+			const updateInfo = {
+				producto: updateData.producto,
+				descripcion: updateData.descripcion,
+				precio: parseFloat(updateData.precio).toFixed(2),
+				marca: updateData.marca,
+				existencia: parseInt(updateData.existencia),
+				categoria: updateData.categoria,
+			};
+			await addDoc(collection(db, 'productos'), updateInfo)
+				.then(() => {
+					Swal.fire({
+						position: 'top-end',
+						icon: 'success',
+						title: 'Producto agregado',
+						showConfirmButton: true,
+					}).then(() => {
+						navigate('/admin');
+					});
+				})
+				.catch(() => {
+					Swal.fire({
+						position: 'top-end',
+						icon: 'error',
+						title: 'Error al agregar el producto',
+						showConfirmButton: true,
+					});
 				});
+		} else {
+			const docRef = doc(db, 'productos', id);
+			const updateInfo = {
+				producto: updateData.producto,
+				descripcion: updateData.descripcion,
+				precio: parseFloat(updateData.precio),
+				img: updateData.img,
+				marca: updateData.marca,
+				existencia: parseInt(updateData.existencia),
+				categoria: updateData.categoria,
+			};
+			await updateDoc(docRef, updateInfo)
+				.then(() => {
+					Swal.fire({
+						position: 'top-end',
+						icon: 'success',
+						title: 'Modificación exitosa',
+						showConfirmButton: true,
+					}).then(() => {
+						navigate('/admin');
+					});
+				})
+				.catch(() => {
+					Swal.fire({
+						position: 'top-end',
+						icon: 'error',
+						title: 'Error al modificart el producto',
+						showConfirmButton: true,
+					});
+				});
+		}
+	};
+
+	const handlerDelet = () => {
+		const swalWithBootstrapButtons = Swal.mixin({
+			customClass: {
+				confirmButton: 'btn btn-success m-2',
+				cancelButton: 'btn btn-danger m-2',
+			},
+			buttonsStyling: false,
+		});
+		swalWithBootstrapButtons
+			.fire({
+				title: '¿Eliminar producto?',
+				text: 'No podrás revertir esta acción',
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonText: 'Si, eliminar!',
+				cancelButtonText: 'No, cancelar',
+				reverseButtons: true,
 			})
-			.catch(() => {
-				Swal.fire({
-					position: 'top-end',
-					icon: 'error',
-					title: 'Error al modificart el producto',
-					showConfirmButton: true,
-				});
+			.then(async (result) => {
+				if (result.isConfirmed) {
+					await deleteDoc(doc(db, 'productos', id));
+					swalWithBootstrapButtons.fire({
+						title: 'Eliminado!',
+						text: 'El producto ha sido eliminado!',
+						icon: 'success',
+					});
+					navigate('/admin');
+				} else if (result.dismiss === Swal.DismissReason.cancel) {
+					swalWithBootstrapButtons.fire({
+						title: 'Cancelado',
+						text: 'El producto está a salvo :)',
+						icon: 'error',
+					});
+				}
 			});
 	};
 
 	return (
 		<div className='itemDetail'>
 			<div className='container2'>
-				<div className='img'>
-					<img
-						className='detalleImg'
-						src={img}
-						alt={`foto de una imagen de un queso ${tipo}`}
-					/>
-				</div>
+				{id !== 'nuevo_prod' ? (
+					<div className='img'>
+						<img
+							className='detalleImg'
+							src={img}
+							alt={`foto de una imagen de un ${categoria} ${producto}`}
+						/>
+					</div>
+				) : (
+					<div className='img'>
+						<img className='detalleImg' />
+						Agregar imagen de producto!!!
+					</div>
+				)}
 				<div className='descrip'>
 					<p className='detalleSub'>
 						<span>Marca: </span>
-						<textarea name='marca' rows={1} cols={25} value={''}>
-							{marca}
-						</textarea>
+						<textarea
+							name='marca'
+							rows={1}
+							cols={25}
+							onChange={handleChange}
+							defaultValue={marca}
+						/>
 					</p>
 					<p className='detalleSub'>
-						<span>Tipo: </span>
-						<textarea name='tipo' rows={2} cols={25} value={''}>
-							{tipo}
-						</textarea>
+						<span>Producto: </span>
+						<textarea
+							name='producto'
+							rows={2}
+							cols={25}
+							onChange={handleChange}
+							defaultValue={producto}
+						/>
+					</p>
+					<p className='detalleSub'>
+						<span>categoria: </span>
+						<textarea
+							name='categoria'
+							rows={2}
+							cols={25}
+							onChange={handleChange}
+							defaultValue={categoria}
+						/>
 					</p>
 					<p className='detalleDesc'>
 						<span>Descripción: </span>
-						<textarea name='descripcion' rows={4} cols={25} value={''}>
-							{descripcion}
-						</textarea>
+						<textarea
+							name='descripcion'
+							rows={4}
+							cols={25}
+							onChange={handleChange}
+							defaultValue={descripcion}
+						/>
 					</p>
 					<p className='detallePrecio'>
 						<span>Precio: </span>
-						<textarea name='precio' rows={1} cols={10} value={''}>
-							{precio}
-						</textarea>
+						<textarea
+							name='precio'
+							rows={1}
+							cols={10}
+							typeof='number'
+							onChange={handleChange}
+							defaultValue={precio}
+						/>
 					</p>
 					<p className='detallePrecio'>
 						<span>Stock: </span>
-						<textarea name='existencia' rows={1} cols={10} value={''}>
-							{existencia}
-						</textarea>
+						<textarea
+							name='existencia'
+							rows={1}
+							cols={10}
+							typeof='number'
+							onChange={handleChange}
+							defaultValue={existencia}
+						></textarea>
 					</p>
-					<button className='btn btn-primary p-1 m-3' onClick={handlerModif}>
-						<svg
-							xmlns='http://www.w3.org/2000/svg'
-							width='16'
-							height='16'
-							fill='currentColor'
-							className='bi bi-arrow-clockwise'
-							viewBox='0 0 16 16'
-						>
-							<path
-								fillrule='evenodd'
-								d='M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z'
-							/>
-							<path d='M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z' />
-						</svg>
+					<button className='btn btn-primary p-1 m-3' onClick={handleCancel}>
+						<SettingsBackupRestoreOutlined /> Cancelar cambios
 					</button>
-					<button className='btn btn-success p-1 m-3'>Guardar cambios</button>
+					<button className='btn btn-success p-1 m-3' onClick={handlerModif}>
+						<SaveAltOutlined /> Guardar cambios
+					</button>
+					{id !== 'nuevo_prod' && (
+						<button className='btn btn-danger p-1 m-3' onClick={handlerDelet}>
+							<DeleteForeverOutlined /> Eliminar Producto
+						</button>
+					)}
 				</div>
 			</div>
 		</div>

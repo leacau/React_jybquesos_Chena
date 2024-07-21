@@ -47,7 +47,6 @@ const Register = () => {
 					userCredential && navigate('/login');
 				})
 				.catch((error) => {
-					console.log(error.code);
 					switch (error.code) {
 						case 'auth/weak-password' || 'auth/invalid-password':
 							setError(

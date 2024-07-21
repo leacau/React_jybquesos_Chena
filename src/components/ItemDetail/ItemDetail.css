@@ -41,12 +41,16 @@ span {
     color: black;
 }
 
-.detalleSub,
-.detalleDesc,
-.detallePrecio {
+.detalleTit {
     padding-left: 10px;
     font-size: 20px;
-    font-weight: 300;
+    font-weight: 700;
+    text-align: left;
+    color: #1f05b1;
+    margin-bottom: 0;
+}
+.detalleText{
+    padding-left: 20px;
     text-align: left;
 }
 
@@ -76,11 +80,6 @@ span {
         width: 80%;
         height: auto;
         align-items: center;
-    }
-    .detalleSub,
-    .detalleDesc,
-    .detallePrecio{
-        font-size: 20px;
     }
         
     }

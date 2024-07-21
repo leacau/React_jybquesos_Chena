@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
 	addDoc,
 	collection,
@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Checkout = () => {
 	const navigate = useNavigate();
-	const { carrito, getTotal, limpiarCarritoFunc, infoUser, user } =
+	const { carrito, getTotal, limpiarCarrito, infoUser, user } =
 		useContext(CartContext);
 	const [loading, setLoading] = useState(false);
 	const Swal = require('sweetalert2');
@@ -28,7 +28,7 @@ const Checkout = () => {
 		telefono: user && infoUser.telefono,
 	});
 
-	if (!user) {
+	useEffect(() => {
 		if (!user) {
 			Swal.fire({
 				position: 'top-end',
@@ -40,137 +40,131 @@ const Checkout = () => {
 				navigate('/login');
 			});
 		}
-	} else {
-		if (user) {
-			Swal.fire({
-				title: 'Corroborá los datos de envío. Modificalos si es necesario',
-				confirmButtonText: 'Hecho',
-			});
-		}
+		Swal.fire({
+			title: 'Corroborá los datos de envío. Modificalos si es necesario',
+			confirmButtonText: 'Ok',
+		});
+	}, [user]);
 
-		const handleInput = (e) => {
-			e.persist();
-			setCheckoutInput({ ...checkoutInput, [e.target.name]: e.target.value });
+	const handleInput = (e) => {
+		e.preventDefault();
+		setCheckoutInput({ ...checkoutInput, [e.target.name]: e.target.value });
+	};
+
+	const total = getTotal();
+
+	const handleCreateOrder = () => {
+		setLoading(true);
+
+		const objOrder = {
+			buyer: {
+				name: checkoutInput.nombre,
+				lastName: checkoutInput.apellido,
+				email: checkoutInput.email,
+				phone: checkoutInput.telefono,
+				fecha: new Date(),
+			},
+			items: carrito,
+			total,
 		};
 
-		const total = getTotal();
+		const batch = writeBatch(db);
+		const ids = carrito.map((item) => item.id);
+		const outOfStock = [];
+		const collectionRef = collection(db, 'productos');
 
-		const handleCreateOrder = () => {
-			setLoading(true);
+		getDocs(query(collectionRef, where(documentId(), 'in', ids)))
+			.then((response) => {
+				response.docs.forEach((doc) => {
+					const dataDoc = doc.data();
+					const prodCarr = carrito.find((prod) => prod.id === doc.id);
+					const prodCarrCantidad = prodCarr.cantidad;
 
-			const objOrder = {
-				buyer: {
-					name: checkoutInput.nombre,
-					lastName: checkoutInput.apellido,
-					email: checkoutInput.email,
-					phone: checkoutInput.telefono,
-					fecha: new Date(),
-				},
-				items: carrito,
-				total,
-			};
-
-			const batch = writeBatch(db);
-
-			const ids = carrito.map((item) => item.id);
-
-			const outOfStock = [];
-
-			const collectionRef = collection(db, 'productos');
-
-			getDocs(query(collectionRef, where(documentId(), 'in', ids)))
-				.then((response) => {
-					response.docs.forEach((doc) => {
-						const dataDoc = doc.data();
-
-						const prodCarr = carrito.find((prod) => prod.id === doc.id);
-						const prodCarrCantidad = prodCarr.cantidad;
-
-						if (dataDoc.existencia >= prodCarrCantidad) {
-							batch.update(doc.ref, {
-								existencia: dataDoc.existencia - prodCarrCantidad,
-							});
-						} else {
-							outOfStock.push({ id: doc.id, ...dataDoc });
-						}
-					});
-				})
-				.then(() => {
-					if (outOfStock.length === 0) {
-						if (
-							checkoutInput.apellido === '' ||
-							checkoutInput.nombre === '' ||
-							checkoutInput.email === '' ||
-							checkoutInput.telefono === ''
-						) {
-							return Promise.reject({ type: 'emptyInfo' });
-						} else {
-							const collectionRef = collection(db, 'orders');
-
-							return addDoc(collectionRef, objOrder);
-						}
-					} else {
-						return Promise.reject({ type: 'outOfStock', data: outOfStock });
-					}
-				})
-				.then(({ id }) => {
-					batch.commit();
-					Swal.fire({
-						title: 'Tomá nota del Id del pedido',
-						html: `<b>${id}</b>`,
-						confirmButtonText: 'Hecho',
-					}).then((res) => {
-						if (res.isConfirmed) {
-							Swal.fire({
-								title: 'Pedido realizado con éxito',
-								html: `En breve nos pondremos en conacto para coordinar la entrega`,
-								confirmButtonText: 'Hecho',
-								icon: 'success',
-							}).then((response) => {
-								if (response.isConfirmed) {
-									window.location = '../../';
-									limpiarCarritoFunc('no');
-								}
-							});
-						}
-					});
-				})
-				.catch((error) => {
-					if (error.type === 'outOfStock') {
-						Swal.fire({
-							title: 'Productos sin existencia',
-							html: `<b>${error.data
-								.map(
-									(item) =>
-										`${item.marca}-${item.tipo}. Stock:(${item.existencia})`
-								)
-								.join(', ')}</b>`,
-							confirmButtonText: 'Ok',
-						});
-					} else if (error.type === 'emptyInfo') {
-						Swal.fire({
-							title: 'Faltan datos de contacto',
-							text: 'Por favor complete todos los campos',
-							confirmButtonText: 'Ok',
-							timer: 1500,
+					if (parseInt(dataDoc.existencia) >= parseInt(prodCarrCantidad)) {
+						batch.update(doc.ref, {
+							existencia:
+								parseInt(dataDoc.existencia) - parseInt(prodCarrCantidad),
 						});
 					} else {
-						Swal.fire({
-							title: 'Error',
-							text: 'Ha ocurrido un error, por favor intente nuevamente',
-							confirmButtonText: 'Ok',
-						});
+						outOfStock.push({ id: doc.id, ...dataDoc });
 					}
-				})
-				.finally(() => {
-					setLoading(false);
 				});
-		};
+			})
+			.then(() => {
+				if (outOfStock.length === 0) {
+					if (
+						checkoutInput.apellido === '' ||
+						checkoutInput.nombre === '' ||
+						checkoutInput.email === '' ||
+						checkoutInput.telefono === ''
+					) {
+						return Promise.reject({ type: 'emptyInfo' });
+					} else {
+						const collectionRef = collection(db, 'orders');
 
-		if (loading) {
-			return <h1>Se esta generando su orden...</h1>;
-		}
-
+						return addDoc(collectionRef, objOrder);
+					}
+				} else {
+					return Promise.reject({ type: 'outOfStock', data: outOfStock });
+				}
+			})
+			.then(({ id }) => {
+				batch.commit();
+				Swal.fire({
+					title: 'Tomá nota del Id del pedido',
+					html: `<b>${id}</b>`,
+					confirmButtonText: 'Hecho',
+				}).then((res) => {
+					if (res.isConfirmed) {
+						Swal.fire({
+							title: 'Pedido realizado con éxito',
+							html: `En breve nos pondremos en conacto para coordinar la entrega`,
+							confirmButtonText: 'Hecho',
+							icon: 'success',
+						}).then((response) => {
+							if (response.isConfirmed) {
+								window.location = '../../';
+								limpiarCarrito('no');
+							}
+						});
+					}
+				});
+			})
+			.catch((error) => {
+				if (error.type === 'outOfStock') {
+					Swal.fire({
+						title: 'Productos sin existencia',
+						html: `<b>${error.data
+							.map(
+								(item) =>
+									`${item.marca}-${item.producto}. Stock:(${item.existencia})`
+							)
+							.join('</br> ')}</b>`,
+						confirmButtonText: 'Ok',
+					});
+				} else if (error.type === 'emptyInfo') {
+					Swal.fire({
+						title: 'Faltan datos de contacto',
+						text: 'Por favor complete todos los campos',
+						confirmButtonText: 'Ok',
+						timer: 1500,
+					});
+				} else {
+					Swal.fire({
+						title: 'Error',
+						text: 'Ha ocurrido un error, por favor intente nuevamente',
+						confirmButtonText: 'Ok',
+					});
+					console.log(error);
+				}
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+	};
+	if (loading) {
+		return <h1>Se esta generando su orden...</h1>;
+	} else {
 		return (
 			<div className='py-4'>
 				<div className='container'>
@@ -191,7 +185,7 @@ const Checkout = () => {
 													name='apellido'
 													className='form-control'
 													onChange={handleInput}
-													value={checkoutInput.apellido}
+													defaultValue={checkoutInput.apellido}
 												></input>
 											</div>
 											<div className='form-group mb-3'>
@@ -201,7 +195,7 @@ const Checkout = () => {
 													name='nombre'
 													className='form-control'
 													onChange={handleInput}
-													value={checkoutInput.nombre}
+													defaultValue={checkoutInput.nombre}
 												></input>
 											</div>
 											<div className='form-group mb-3'>
@@ -211,7 +205,7 @@ const Checkout = () => {
 													name='telefono'
 													className='form-control'
 													onChange={handleInput}
-													value={checkoutInput.telefono}
+													defaultValue={checkoutInput.telefono}
 												></input>
 											</div>
 											<div className='form-group mb-3'>
@@ -221,7 +215,7 @@ const Checkout = () => {
 													name='email'
 													className='form-control'
 													onChange={handleInput}
-													value={checkoutInput.email}
+													defaultValue={checkoutInput.email}
 												></input>
 											</div>
 										</div>
@@ -245,7 +239,7 @@ const Checkout = () => {
 										return (
 											<tr key={producto.id}>
 												<td>
-													{producto.marca}-{producto.tipo}
+													{producto.marca}-{producto.producto}
 												</td>
 												<td>{producto.cantidad}</td>
 												<td>$ {subTotal}</td>

@@ -4,7 +4,7 @@ import React, { useContext } from 'react';
 
 import CartContext from '../../context/cartContext';
 
-const ItemCart = ({ id, tipo, marca, img, precio, cantidad }) => {
+const ItemCart = ({ id, producto, marca, img, precio, cantidad }) => {
 	const subtotal = precio * cantidad;
 	const { quitarItem } = useContext(CartContext);
 
@@ -17,12 +17,12 @@ const ItemCart = ({ id, tipo, marca, img, precio, cantidad }) => {
 				<img
 					className='imagenProdCart'
 					src={img}
-					alt={`foto de una imagen de un queso ${tipo}`}
+					alt={`foto de una imagen de un queso ${producto}`}
 				/>
 			</>
 			<div>
 				<span>Producto: </span>
-				{tipo} ({marca})
+				{producto} ({marca})
 			</div>
 			<div>
 				<span>Precio xKg: </span>${precio}

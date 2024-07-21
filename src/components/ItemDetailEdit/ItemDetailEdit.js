@@ -15,7 +15,6 @@ const ItemDetailEdit = () => {
 
 	useEffect(() => {
 		const docRef = doc(db, 'productos', productoId);
-
 		getDoc(docRef)
 			.then((res) => {
 				const productFormatted = { id: res.id, ...res.data() };

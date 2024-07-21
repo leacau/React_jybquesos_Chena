@@ -7,28 +7,53 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/cartContext';
 
 const NavBar = () => {
-	const { user, getUserData, infoUser, logOut } = useAuth();
+	const { user, getUserData, infoUser, logOut, productos, loading } = useAuth();
 	const [stock, setStock] = useState('');
+	const [menuItems, setMenuItems] = useState('');
+	const [categoria, setCategoria] = useState([]);
 
 	useEffect(() => {
-		if (user) {
-			getUserData(user.uid);
-		}
-
-		if (infoUser.rol === 'admin') {
-			setStock(
-				<li>
-					{infoUser.rol === 'admin' && (
-						<Link to='/admin' className='navLink'>
-							Panel Admin
-						</Link>
-					)}
-				</li>
-			);
+		if (loading) {
 		} else {
-			setStock('');
+			if (user) {
+				getUserData(user.uid);
+			}
+
+			if (infoUser.rol === 'admin') {
+				setStock(
+					<li>
+						{infoUser.rol === 'admin' && (
+							<Link to='/admin' className='navLink'>
+								Panel Admin
+							</Link>
+						)}
+					</li>
+				);
+			} else {
+				setStock('');
+			}
+
+			if (productos) {
+				let CategoriasTodas = [];
+
+				productos.forEach((product) => {
+					CategoriasTodas.push(product.categoria);
+				});
+
+				const dataArr = new Set(CategoriasTodas);
+
+				setCategoria([...dataArr]);
+				const listItems = categoria.map((data) => (
+					<li key={data + 1}>
+						<Link to={'categoria/' + data} className='navLink' key={data + 1}>
+							{data}
+						</Link>
+					</li>
+				));
+				setMenuItems(listItems);
+			}
 		}
-	}, [user, infoUser.rol]);
+	}, [user, infoUser.rol, productos, setCategoria, loading]);
 
 	return (
 		<header className='App-header'>
@@ -39,16 +64,7 @@ const NavBar = () => {
 							Inicio
 						</Link>
 					</li>
-					<li>
-						<Link to='/categoria/quesos' className='navLink'>
-							Quesos
-						</Link>
-					</li>
-					<li>
-						<Link to='/categoria/otros' className='navLink'>
-							Otros
-						</Link>
-					</li>
+					{menuItems}
 					{stock}
 					<li>
 						{user && (
@@ -62,14 +78,6 @@ const NavBar = () => {
 							</Link>
 						)}
 					</li>
-
-					{/* 			<li>
-						{infoUser.rol === 'admin' && (
-							<Link to='/admin' className='navLink'>
-								Panel Admin
-							</Link>
-						)}
-					</li> */}
 					<li className='widget'>
 						<CartWidget />
 					</li>

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import {
 	createUserWithEmailAndPassword,
 	onAuthStateChanged,
@@ -6,7 +7,6 @@ import {
 	signInWithEmailAndPassword,
 	signOut,
 } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 
 import { auth } from '../services/firebase';
 import { db } from '../services/firebase';
@@ -14,28 +14,86 @@ import { db } from '../services/firebase';
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-	const [carrito, setCarrito] = useState([]);
-	const [cantProductos, setCantProductos] = useState(0);
-	const [user, setUser] = useState('');
-	const [loading, setLoading] = useState(true);
-	const [infoUser, setInfoUser] = useState('');
-	const [errorLogin, setErrorLogin] = useState('');
+	const [carrito, SetCarrito] = useState([]);
+	const [cantProductos, SetCantProductos] = useState(0);
+	const [user, SetUser] = useState('');
+	const [loading, SetLoading] = useState(true);
+	const [infoUser, SetInfoUser] = useState('');
+	const [errorLogin, SetErrorLogin] = useState('');
+	const [productos, SetProductos] = useState([]);
+	const [adminProductos, SetAdminProductos] = useState([]);
+	const Swal = require('sweetalert2');
+
+	useEffect(() => {
+		if (productos.length === 0) {
+			obtenerProductos();
+		}
+
+		let cantProductos = 0;
+		carrito.forEach((prod) => {
+			cantProductos += prod.cantidad;
+		});
+		SetCantProductos(cantProductos);
+		onAuthStateChanged(auth, (currentUser) => {
+			SetUser(currentUser);
+			SetLoading(false);
+		});
+	}, [carrito, user, productos]);
+
+	const setLocalStorage = (array, item) => {
+		console.log(item);
+		const newLocalStorage = [...array, item];
+		localStorage.setItem('carritoStorage', JSON.stringify(newLocalStorage));
+	};
 
 	const addItem = (agregarProduct) => {
-		const Swal = require('sweetalert2');
-
-		if (
-			!carrito.some((prod) => prod.id === agregarProduct.id) &&
-			agregarProduct.cantidad > 0
-		) {
-			setCarrito([...carrito, agregarProduct]);
+		if (!carrito.some((prod) => prod.id === agregarProduct.id)) {
+			SetCarrito([...carrito, agregarProduct]);
 			Swal.fire({
 				title: 'producto agregado',
 				position: 'top',
 				background: '#defde0',
 				timer: 1000,
 			});
+			setLocalStorage(carrito, agregarProduct);
+		} else {
+			const nuevoCarrito = carrito.filter(
+				(prod) => prod.id !== agregarProduct.id
+			);
+			SetCarrito([...nuevoCarrito, agregarProduct]);
+
+			Swal.fire({
+				title: 'producto modificado',
+				position: 'top',
+				background: '#defde0',
+				timer: 1000,
+			});
+			setLocalStorage(carrito);
 		}
+	};
+
+	const obtenerProductos = async () => {
+		SetLoading(true);
+
+		const collectionRef = collection(db, 'productos');
+
+		await getDocs(collectionRef)
+			.then((res) => {
+				const productosFromatted = res.docs.map((doc) => {
+					return { id: doc.id, ...doc.data() };
+				});
+				const productosFiltrados = productosFromatted.filter(
+					(producto) => producto.existencia > 0
+				);
+				SetAdminProductos(productosFromatted);
+				SetProductos(productosFiltrados);
+			})
+			.catch((error) => {
+				console.log(error);
+			})
+			.finally(() => {
+				SetLoading(false);
+			});
 	};
 
 	const quitarItem = (id) => {
@@ -53,16 +111,22 @@ export const CartProvider = ({ children }) => {
 			if (result.isConfirmed) {
 				Swal.fire({
 					title: 'Producto quitado!',
-					icon: 'success',
+					background: '#f1ff2b',
+					timer: 1000,
+					position: 'bottom-end',
 				});
 				const nuevoCarrito = carrito.filter((prod) => prod.id !== id);
-				setCarrito(nuevoCarrito);
+				SetCarrito(nuevoCarrito);
 			}
+			setLocalStorage(carrito);
 		});
 	};
 
-	const limpiarCarrito = () => {
+	const limpiarCarrito = (params) => {
 		const Swal = require('sweetalert2');
+
+		/* 	if (params === undefined || params === null || params === '') {
+		} */
 
 		Swal.fire({
 			title: 'Estás seguro?',
@@ -79,7 +143,8 @@ export const CartProvider = ({ children }) => {
 					'Los productos fueron eliminados del carrito',
 					'success'
 				);
-				setCarrito([]);
+				SetCarrito([]);
+				localStorage.clear();
 			}
 		});
 	};
@@ -94,18 +159,13 @@ export const CartProvider = ({ children }) => {
 		return total;
 	};
 
-	useEffect(() => {
-		console.log(auth);
-		let cantProductos = 0;
-		carrito.forEach((prod) => {
-			cantProductos += prod.cantidad;
-		});
-		setCantProductos(cantProductos);
-		onAuthStateChanged(auth, (currentUser) => {
-			setUser(currentUser);
-			setLoading(false);
-		});
-	}, [carrito, user]);
+	const loadLocalStorage = async () => {
+		const storageCart = await localStorage.getItem('carritoStorage');
+		if (storageCart !== null && storageCart.length > 0) {
+			const dataStorageCart = await JSON.parse(storageCart);
+			SetCarrito(dataStorageCart);
+		}
+	};
 
 	const signUp = (email, password) =>
 		createUserWithEmailAndPassword(auth, email, password);
@@ -115,25 +175,25 @@ export const CartProvider = ({ children }) => {
 			const errorCodeLogin = error.code;
 			const errorMessageLogin = error.message;
 
-			setErrorLogin({ code: errorCodeLogin, message: errorMessageLogin });
+			SetErrorLogin({ code: errorCodeLogin, message: errorMessageLogin });
 		});
 		await onAuthStateChanged(auth, (currentUser) => {
-			setUser(currentUser);
-			setLoading(false);
+			SetUser(currentUser);
+			SetLoading(false);
 		});
 	};
 
 	const logOut = async () => {
 		await signOut(auth);
-		setUser('');
-		setInfoUser('');
+		SetUser('');
+		SetInfoUser('');
 	};
 
 	const getUserData = async (userId) => {
 		const docuRef = doc(db, `users/${userId}`);
 		const infoCifrada = await getDoc(docuRef);
 		const infoUsuario = infoCifrada.data();
-		setInfoUser(infoUsuario);
+		SetInfoUser(infoUsuario);
 	};
 	const resetPassword = (email) => sendPasswordResetEmail(auth, email);
 
@@ -155,6 +215,11 @@ export const CartProvider = ({ children }) => {
 				infoUser,
 				getUserData,
 				logOut,
+				productos,
+				obtenerProductos,
+				adminProductos,
+				setLocalStorage,
+				loadLocalStorage,
 			}}
 		>
 			{children}

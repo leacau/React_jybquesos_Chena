@@ -9,38 +9,32 @@ import { useAuth } from '../../context/cartContext';
 
 const ItemDetail = ({
 	id,
-	tipo,
+	producto,
 	descripcion,
 	precio,
 	img,
 	marca,
 	existencia,
 }) => {
-	const { addItem } = useContext(CartContext);
+	const { addItem, carrito } = useContext(CartContext);
 	const [cantidadAgregada, setCantidadAgregada] = useState(0);
 	const { user } = useAuth();
 	const Swal = require('sweetalert2');
 
-	/* if (!user) {
-		console.log('aca entra');
-		Swal.fire({
-			title: 'Para agregar productos al carrito debrás ingresar a tu cuenta',
-			confirmButtonText: 'Entendido',
-		});
-	} */
-
 	useEffect(() => {
 		if (!user) {
-			console.log('aca tambien');
 			Swal.fire({
-				title: 'Para agregar productos al carrito debrás ingresar a tu cuenta',
+				title: 'Para agregar productos al carrito deberás ingresar a tu cuenta',
 				confirmButtonText: 'Entendido',
 			});
 		}
 	}, [user, Swal]);
 
+	const productCount = carrito.filter((item) => item.id === id);
+	const startCount = productCount.length === 0 ? 0 : productCount[0].cantidad;
+
 	const agregar = (cantidad) => {
-		addItem({ id, marca, tipo, precio, cantidad, img });
+		addItem({ id, marca, producto, precio, cantidad, img });
 		setCantidadAgregada(cantidad);
 	};
 
@@ -51,30 +45,30 @@ const ItemDetail = ({
 					<img
 						className='detalleImg'
 						src={img}
-						alt={`foto de una imagen de un queso ${tipo}`}
+						alt={`foto de una imagen de un queso ${producto}`}
 					/>
 				</div>
 				<div className='descrip'>
-					<p className='detalleSub'>
-						<span>Marca: </span>
-						{marca}
-					</p>
-					<p className='detalleSub'>
-						<span>Tipo: </span>
-						{tipo}
-					</p>
-					<p className='detalleDesc'>
-						<span>Descripción: </span>
-						{descripcion}
-					</p>
-					<p className='detallePrecio'>
-						<span>Precio: </span>${precio}
-					</p>
+					<p className='detalleTit'>Marca:</p>
+					<p className='detalleText'>{marca}</p>
+
+					<p className='detalleTit'>Tipo:</p>
+					<p className='detalleText'>{producto}</p>
+
+					<p className='detalleTit'>Descripción:</p>
+					<p className='detalleText'>{descripcion}</p>
+
+					<p className='detalleTit'>Precio:</p>
+					<p className='detalleText'>${precio}</p>
 				</div>
 				{user && (
 					<div className='counter'>
 						{cantidadAgregada === 0 ? (
-							<Contador inicial={0} maximo={existencia} agregar={agregar} />
+							<Contador
+								inicial={startCount !== undefined ? startCount : 0}
+								maximo={existencia}
+								agregar={agregar}
+							/>
 						) : (
 							<div>
 								<Link to='/carrito'>

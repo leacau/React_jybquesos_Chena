@@ -13,7 +13,6 @@ const Login = () => {
 
 	useEffect(() => {
 		if (user) {
-			console.log(user);
 			navigate('/');
 		}
 	}, [user, navigate]);
@@ -21,8 +20,7 @@ const Login = () => {
 	const handleLogin = async (e) => {
 		e.preventDefault();
 		await signIn(email, password).catch((error) => {
-			console.log('Error: ', error);
-			setError('este error escribi yo');
+			setError(error);
 		});
 	};
 

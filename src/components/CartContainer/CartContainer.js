@@ -25,6 +25,7 @@ const CartContainer = () => {
 			title: 'Su carrito está vacío',
 			timer: 1500,
 		}).then(() => {
+			localStorage.clear();
 			navigate('/');
 		});
 	}

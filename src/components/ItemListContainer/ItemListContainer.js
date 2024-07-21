@@ -1,72 +1,56 @@
 import './ItemListContainer.css';
 
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
 
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import ItemList from '../ItemList/ItemList';
-import { db } from '../../services/firebase';
 import { useAuth } from '../../context/cartContext';
 import { useParams } from 'react-router-dom';
 
 const ItemListContainer = () => {
-	const [productos, setProductos] = useState([]);
-	const [loading, setLoading] = useState(true);
-	const { user } = useAuth();
-	const Swal = require('sweetalert2');
+	const { user, productos, loading, loadLocalStorage, carrito } = useAuth();
 	const { categoriaId } = useParams();
+	const [productosMostrados, setProductosMostrados] = useState();
 
 	useEffect(() => {
-		setLoading(true);
+		if (categoriaId === undefined) {
+			setProductosMostrados(productos);
+		} else {
+			setProductosMostrados(
+				productos.filter((producto) => producto.categoria === categoriaId)
+			);
+		}
+		if (carrito.length === 0) {
+			loadLocalStorage();
+		}
+	}, [categoriaId, productos]);
 
-		const collectionRef = categoriaId
-			? query(
-					collection(db, 'productos'),
-					where('categoria', '==', categoriaId)
-			  )
-			: collection(db, 'productos');
-
-		getDocs(collectionRef)
-			.then((res) => {
-				const productosFromatted = res.docs.map((doc) => {
-					return { id: doc.id, ...doc.data() };
-				});
-				const productosFiltrados = productosFromatted.filter(
-					(producto) => producto.existencia > 0
-				);
-				setProductos(productosFiltrados);
-			})
-			.catch((error) => {
-				console.log(error);
-			})
-			.finally(() => {
-				setLoading(false);
-			});
-	}, [categoriaId, user, Swal]);
-
-	if (loading) {
-		return <h1>cargando productos...</h1>;
+	if (productos !== undefined) {
+		if (loading) {
+			return <h1>cargando productos...</h1>;
+		} else {
+			return (
+				<div>
+					{!user && (
+						<Alert className='alert' severity='warning'>
+							<AlertTitle>Atención</AlertTitle>
+							Para agregar productos al carrito —{' '}
+							<strong>ingresá a tu cuenta.</strong>
+						</Alert>
+					)}
+					<div className='saludo'>
+						<h2>Tienda de productos</h2>
+					</div>
+					{productos !== undefined && (
+						<div className='catalogo'>
+							<ItemList productos={productosMostrados} />
+						</div>
+					)}
+				</div>
+			);
+		}
 	}
-	return (
-		<div>
-			{!user && (
-				<Alert className='alert' severity='warning'>
-					<AlertTitle>Atención</AlertTitle>
-					Para agregar productos al carrito —{' '}
-					<strong>ingresá a tu cuenta.</strong>
-				</Alert>
-			)}
-			<div className='saludo'>
-				<a href=''>
-					<h2>Tienda de productos</h2>
-				</a>
-			</div>
-			<div className='catalogo'>
-				<ItemList productos={productos} />
-			</div>
-		</div>
-	);
 };
 
 export default ItemListContainer;
